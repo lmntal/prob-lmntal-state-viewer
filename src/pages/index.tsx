@@ -4,6 +4,7 @@ import type { HeadFC, PageProps } from "gatsby";
 
 const IndexPage: React.FC<PageProps> = () => {
   const [inputData, setInputData] = React.useState("");
+  const [selectedState, setSelectedState] = React.useState<{ id: string; label: string } | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -18,7 +19,22 @@ const IndexPage: React.FC<PageProps> = () => {
     const transitions = lines.slice(1, t + 1);
     const states = lines.slice(t + 1);
 
-    const elements = [];
+    interface NodeElement {
+      data: {
+      id: string;
+      label: string;
+      };
+    }
+
+    interface EdgeElement {
+      data: {
+      source: string;
+      target: string;
+      label: string;
+      };
+    }
+
+    const elements: (NodeElement | EdgeElement)[] = [];
 
     // Add nodes
     states.forEach(state => {
@@ -33,14 +49,14 @@ const IndexPage: React.FC<PageProps> = () => {
 
     // Add edges
     transitions.forEach(transition => {
-      const [source, target, , label] = transition.split(" ", 4);
+      const [source, target, label, prob] = transition.split(" ", 4);
       elements.push({
-        data: { source, target, label },
+        data: { source, target, label: `${label} (${prob})` },
       });
     });
 
     // Initialize Cytoscape
-    Cytoscape({
+    const cy = Cytoscape({
       container: containerRef.current,
       elements,
       style: [
@@ -48,7 +64,7 @@ const IndexPage: React.FC<PageProps> = () => {
           selector: "node",
           style: {
             "background-color": "#0074D9",
-            label: "data(id)", // Display state ID as the label
+            label: "data(id)",
           },
         },
         {
@@ -58,14 +74,8 @@ const IndexPage: React.FC<PageProps> = () => {
             "target-arrow-shape": "triangle",
             "line-color": "#FF4136",
             "target-arrow-color": "#FF4136",
-            label: "data(label)",
-          },
-        },
-        {
-          selector: "node:selected",
-          style: {
-            "background-color": "#FF851B",
-            label: "data(label)", // Display state label when clicked
+            "text-wrap": "wrap",
+            "label": "data(label)",
           },
         },
       ],
@@ -75,11 +85,20 @@ const IndexPage: React.FC<PageProps> = () => {
         padding: 10,
       },
     });
+
+    cy.on("select", "node", (event) => {
+      const node = event.target;
+      setSelectedState({ id: node.data("id"), label: node.data("label") });
+    });
+
+    cy.on("unselect", "node", () => {
+      setSelectedState(null);
+    });
   };
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>
-      <div style={{ width: "30%", padding: "1rem", borderRight: "1px solid #ccc" }}>
+      <div style={{ width: "20%", padding: "1rem", borderRight: "1px solid #ccc" }}>
         <h2>lmntal state viewer</h2>
         <textarea
           style={{ width: "100%", height: "70%" }}
@@ -90,11 +109,22 @@ const IndexPage: React.FC<PageProps> = () => {
           グラフを描画
         </button>
       </div>
-      <div ref={containerRef} style={{ flex: 1 }}></div>
+      <div ref={containerRef} style={{ flex: 1, borderRight: "1px solid #ccc" }}></div>
+      <div style={{ width: "20%", padding: "1rem" }}>
+        <h2>選択された状態</h2>
+        {selectedState ? (
+          <div>
+            <p><strong>ID:</strong> {selectedState.id}</p>
+            <p><strong>LMNtal グラフ:</strong> {selectedState.label}</p>
+          </div>
+        ) : (
+          <p>状態が選択されていません。</p>
+        )}
+      </div>
     </div>
   );
 };
 
 export default IndexPage;
 
-export const Head: HeadFC = () => <title>状態遷移グラフ</title>;
+export const Head: HeadFC = () => <title>lmntal state viewer</title>;
