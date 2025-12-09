@@ -102,6 +102,12 @@ const IndexPage: React.FC<PageProps> = () => {
           },
         },
         {
+          selector: "node:selected",
+          style: {
+            "background-color": "#FF851B",
+          },
+        },
+        {
           selector: "edge",
           style: {
             "curve-style": "bezier",
