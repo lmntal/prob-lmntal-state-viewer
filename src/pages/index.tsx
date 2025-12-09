@@ -36,7 +36,11 @@ const IndexPage: React.FC<PageProps> = () => {
 13 {coin([h,t,t]).} six
 14 {coin([t,t,t]).}
 `);
-  const [selectedState, setSelectedState] = React.useState<{ id: string;  content: string; label: string } | null>(null);
+  const [selectedState, setSelectedState] = React.useState<{
+    id: string;
+    content: string;
+    label: string;
+  } | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -71,18 +75,25 @@ const IndexPage: React.FC<PageProps> = () => {
     const elements: (NodeElement | EdgeElement)[] = [];
 
     // Add nodes
-    states.forEach(state => {
+    states.forEach((state) => {
       const match = state.match(/^\S+/);
       if (match) {
-        const [_, id, graph, label] = state.match(/^(\S+)\s+(\{.*\})(?:\s+(.*))?$/)!;
+        const [_, id, graph, label] = state.match(
+          /^(\S+)\s+(\{.*\})(?:\s+(.*))?$/
+        )!;
         elements.push({
-          data: { id, content: graph, label: label || '', idWithLabel: label ? `${id} (${label})` : id },
+          data: {
+            id,
+            content: graph,
+            label: label || "",
+            idWithLabel: label ? `${id} (${label})` : id,
+          },
         });
       }
     });
 
     // Add edges
-    transitions.forEach(transition => {
+    transitions.forEach((transition) => {
       const [source, target, label, prob] = transition.split(" ", 4);
       elements.push({
         data: { source, target, label: `${label} (${prob})` },
@@ -115,7 +126,7 @@ const IndexPage: React.FC<PageProps> = () => {
             "line-color": "#FF4136",
             "target-arrow-color": "#FF4136",
             "text-wrap": "wrap",
-            "label": "data(label)",
+            label: "data(label)",
           },
         },
       ],
@@ -128,7 +139,11 @@ const IndexPage: React.FC<PageProps> = () => {
 
     cy.on("select", "node", (event) => {
       const node = event.target;
-      setSelectedState({ id: node.data("id"), content: node.data("content"), label: node.data("label") });
+      setSelectedState({
+        id: node.data("id"),
+        content: node.data("content"),
+        label: node.data("label"),
+      });
     });
 
     cy.on("unselect", "node", () => {
@@ -138,7 +153,9 @@ const IndexPage: React.FC<PageProps> = () => {
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>
-      <div style={{ width: "20%", padding: "1rem", borderRight: "1px solid #ccc" }}>
+      <div
+        style={{ width: "20%", padding: "1rem", borderRight: "1px solid #ccc" }}
+      >
         <h2>lmntal state viewer</h2>
         <textarea
           style={{ width: "100%", height: "70%" }}
@@ -149,14 +166,23 @@ const IndexPage: React.FC<PageProps> = () => {
           グラフを描画
         </button>
       </div>
-      <div ref={containerRef} style={{ flex: 1, borderRight: "1px solid #ccc" }}></div>
+      <div
+        ref={containerRef}
+        style={{ flex: 1, borderRight: "1px solid #ccc" }}
+      ></div>
       <div style={{ width: "20%", padding: "1rem" }}>
         <h2>選択された状態</h2>
         {selectedState ? (
           <div>
-            <p><strong>ID:</strong> {selectedState.id}</p>
-            <p><strong>LMNtal グラフ:</strong> {selectedState.content}</p>
-            <p><strong>ラベル:</strong> {selectedState.label}</p>
+            <p>
+              <strong>ID:</strong> {selectedState.id}
+            </p>
+            <p>
+              <strong>LMNtal グラフ:</strong> {selectedState.content}
+            </p>
+            <p>
+              <strong>ラベル:</strong> {selectedState.label}
+            </p>
           </div>
         ) : (
           <p>状態が選択されていません。</p>
