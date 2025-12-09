@@ -18,8 +18,8 @@ const IndexPage: React.FC<PageProps> = () => {
 5 12 tail 0.5
 6 13 head 0.5
 6 14 tail 0.5
-7 1 head2 1.0
-14 2 tail2 1.0
+7 1 head2 1
+14 2 tail2 1
 0 {toss. toss. toss. coin([]).}
 1 {toss. toss. coin([h]).}
 2 {toss. toss. coin([t]).}
@@ -28,15 +28,15 @@ const IndexPage: React.FC<PageProps> = () => {
 5 {toss. coin([h,t]).}
 6 {toss. coin([t,t]).}
 7 {coin([h,h,h]).}
-8 {coin([t,h,h]).}
-9 {coin([h,t,h]).}
-10 {coin([t,t,h]).}
-11 {coin([h,h,t]).}
-12 {coin([t,h,t]).}
-13 {coin([h,t,t]).}
+8 {coin([t,h,h]).} one
+9 {coin([h,t,h]).} two
+10 {coin([t,t,h]).} three
+11 {coin([h,h,t]).} four
+12 {coin([t,h,t]).} five
+13 {coin([h,t,t]).} six
 14 {coin([t,t,t]).}
 `);
-  const [selectedState, setSelectedState] = React.useState<{ id: string; label: string } | null>(null);
+  const [selectedState, setSelectedState] = React.useState<{ id: string;  content: string; label: string } | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -53,16 +53,18 @@ const IndexPage: React.FC<PageProps> = () => {
 
     interface NodeElement {
       data: {
-      id: string;
-      label: string;
+        id: string;
+        content: string;
+        label: string;
+        idWithLabel: string;
       };
     }
 
     interface EdgeElement {
       data: {
-      source: string;
-      target: string;
-      label: string;
+        source: string;
+        target: string;
+        label: string;
       };
     }
 
@@ -72,9 +74,9 @@ const IndexPage: React.FC<PageProps> = () => {
     states.forEach(state => {
       const match = state.match(/^\S+/);
       if (match) {
-        const [_, id, label] = state.match(/^(\S+)\s+(.+)$/) || [];
+        const [_, id, graph, label] = state.match(/^(\S+)\s+(\{.*\})(?:\s+(.*))?$/)!;
         elements.push({
-          data: { id, label },
+          data: { id, content: graph, label: label || '', idWithLabel: label ? `${id} (${label})` : id },
         });
       }
     });
@@ -96,7 +98,7 @@ const IndexPage: React.FC<PageProps> = () => {
           selector: "node",
           style: {
             "background-color": "#0074D9",
-            label: "data(id)",
+            label: "data(idWithLabel)",
           },
         },
         {
@@ -120,7 +122,7 @@ const IndexPage: React.FC<PageProps> = () => {
 
     cy.on("select", "node", (event) => {
       const node = event.target;
-      setSelectedState({ id: node.data("id"), label: node.data("label") });
+      setSelectedState({ id: node.data("id"), content: node.data("content"), label: node.data("label") });
     });
 
     cy.on("unselect", "node", () => {
@@ -147,7 +149,8 @@ const IndexPage: React.FC<PageProps> = () => {
         {selectedState ? (
           <div>
             <p><strong>ID:</strong> {selectedState.id}</p>
-            <p><strong>LMNtal グラフ:</strong> {selectedState.label}</p>
+            <p><strong>LMNtal グラフ:</strong> {selectedState.content}</p>
+            <p><strong>ラベル:</strong> {selectedState.label}</p>
           </div>
         ) : (
           <p>状態が選択されていません。</p>
