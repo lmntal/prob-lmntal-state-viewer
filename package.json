@@ -1,8 +1,8 @@
 {
-  "name": "lmntal-state-viewer",
+  "name": "prob-lmntal-state-viewer",
   "version": "1.0.0",
   "private": true,
-  "description": "lmntal-state-viewer",
+  "description": "prob-lmntal-state-viewer",
   "author": "seelx3",
   "keywords": [
     "gatsby"
